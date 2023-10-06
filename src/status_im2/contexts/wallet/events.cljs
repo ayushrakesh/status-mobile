@@ -4,7 +4,9 @@
     [status-im2.data-store.wallet :as data-store]
     [taoensso.timbre :as log]
     [utils.re-frame :as rf]
-    [utils.security.core :as security]))
+    [utils.security.core :as security]
+    [react-native.background-timer :as background-timer]
+    [utils.re-frame :as re-frame]))
 
 (rf/defn scan-address-success
   {:events [:wallet/scan-address-success]}
@@ -75,3 +77,74 @@
                            data-store/<-rpc)
                      data)}]
      {:db (assoc db :wallet/networks network-data)})))
+
+(defn fetch-address-suggestions
+  [{:keys [db]} [address]]
+  {:db (assoc db
+              :wallet/local-suggestions
+              (cond
+                (= address
+                   (get-in
+                    address-local-suggestion-saved-contact-address-mock
+                    [:accounts 0 :address]))
+                [address-local-suggestion-saved-contact-address-mock]
+                (= address
+                   (get address-local-suggestion-saved-address-mock
+                        :address))
+                [address-local-suggestion-saved-address-mock]
+                :else (find-matching-addresses address))
+              :wallet/valid-ens-or-address?
+              false)})
+
+(re-frame/reg-event-fx :wallet/fetch-address-suggestions fetch-address-suggestions)
+
+(defn fetch-ens-suggestions
+  [{:keys [db]} [ens]]
+  {:db (assoc db
+              :wallet/local-suggestions     (if (= ens
+                                                   (:ens ens-local-suggestion-saved-address-mock))
+                                              [ens-local-suggestion-saved-address-mock]
+                                              [ens-local-suggestion-mock])
+              :wallet/valid-ens-or-address? true)})
+
+(re-frame/reg-event-fx :wallet/ens-validation-success fetch-ens-suggestions)
+
+(defn address-validation-success
+  [{:keys [db]} [_]]
+  {:db (assoc db :wallet/valid-ens-or-address? true)})
+
+(re-frame/reg-event-fx :wallet/address-validation-success address-validation-success)
+
+(defn validate-address
+  [{:keys [db]} [address]]
+  (let [current-timeout (get db :wallet/search-timeout)
+        timeout         (background-timer/set-timeout
+                         #(rf/dispatch [:wallet/address-validation-success address])
+                         2000)]
+    (background-timer/clear-timeout current-timeout)
+    {:db (assoc db
+                :wallet/valid-ens-or-address? false
+                :wallet/search-timeout        timeout)}))
+
+(re-frame/reg-event-fx :wallet/validate-address validate-address)
+
+(defn validate-ens
+  [{:keys [db]} [ens]]
+  (let [current-timeout (get db :wallet/search-timeout)
+        timeout         (background-timer/set-timeout
+                         #(rf/dispatch [:wallet/ens-validation-success ens])
+                         2000)]
+    (background-timer/clear-timeout current-timeout)
+    {:db (assoc db
+                :wallet/valid-ens-or-address? false
+                :wallet/search-timeout        timeout)}))
+
+(re-frame/reg-event-fx :wallet/validate-ens validate-ens)
+
+(defn clean-local-suggestions
+  [{:keys [db]}]
+  (let [current-timeout (get db :wallet/search-timeout)]
+    (background-timer/clear-timeout current-timeout)
+    {:db (assoc db :wallet/local-suggestions [] :wallet/valid-ens-or-address? false)}))
+
+(re-frame/reg-event-fx :wallet/clean-local-suggestions clean-local-suggestions)
