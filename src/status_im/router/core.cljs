@@ -7,7 +7,7 @@
     [status-im.ethereum.eip681 :as eip681]
     [status-im.ethereum.ens :as ens]
     [status-im.ethereum.stateofus :as stateofus]
-    [status-im.utils.wallet-connect :as wallet-connect]
+    [status-im.utils.deprecated-types :as types]
     [status-im2.constants :as constants]
     [status-im2.contexts.chat.events :as chat.events]
     [taoensso.timbre :as log]
