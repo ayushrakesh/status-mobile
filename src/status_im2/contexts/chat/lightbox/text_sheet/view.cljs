@@ -70,6 +70,7 @@
           [gesture/scroll-view
            {:scroll-enabled        @expanded?
             :scroll-event-throttle 16
+            :bounces               false
             :on-scroll             #(utils/on-scroll % @expanded? @dragging? animations)
             :style                 {:height (- max-height constants/bar-container-height)}}
            [message-view/render-parsed-text
