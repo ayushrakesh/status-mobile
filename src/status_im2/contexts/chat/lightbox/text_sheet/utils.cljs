@@ -21,7 +21,7 @@
          (let [event-value     (oops/oget e "translationY")
                old-value       (reanimated/get-shared-value saved-top)
                new-value       (+ old-value event-value)
-               progress        (/ (- new-value) expanded-height)
+               progress        (/ (- new-value) max-height)
                upper-boundery? (< new-value (- full-height))
                lower-boundary? (and (> new-value (- constants/text-min-height))
                                     (pos? event-value))]
@@ -57,12 +57,6 @@
     (reanimated/set-shared-value saved-top (- expanded-height))
     (reset! overlay-z-index 1)
     (reset! expanded? true)))
-
-(defn on-scroll
-  [e expanded? dragging? {:keys [gradient-opacity]}]
-  (if (and (> (oops/oget e "nativeEvent.contentOffset.y") 0) (not expanded?) (not dragging?))
-    (reanimated/animate gradient-opacity 1)
-    (reanimated/animate gradient-opacity 0)))
 
 (defn on-layout
   [e text-height]
