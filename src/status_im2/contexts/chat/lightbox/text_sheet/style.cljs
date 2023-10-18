@@ -6,12 +6,16 @@
 
 (defn sheet-container
   [{:keys [height top]}]
-  (reanimated/apply-animations-to-style
-   {:height height
-    :top    top}
-   {:position :absolute
-    :left     0
-    :right    0}))
+  (let [top-bound (- (- constants/text-min-height 10))]
+    (reanimated/apply-animations-to-style
+     {:height height
+      :top    (reanimated/interpolate top
+                                      [top-bound (dec top-bound)]
+                                      [top-bound (dec top-bound)]
+                                      {:extrapolateLeft "clamp" :extrapolateRight "identity"})}
+     {:position :absolute
+      :left     0
+      :right    0})))
 
 (def text-style
   {:color             colors/white
@@ -36,25 +40,30 @@
    :border-color     colors/neutral-100})
 
 (defn top-gradient
-  [{:keys [gradient-opacity]} insets]
-  (reanimated/apply-animations-to-style
-   {:opacity gradient-opacity}
-   {:position :absolute
-    :left     0
-    :right    0
-    :top      (- (+ (:top insets)
-                    constants/top-view-height))
-    :height   (+ (:top insets)
-                 constants/top-view-height
-                 constants/bar-container-height
-                 constants/text-margin
-                 (* constants/line-height 2))
-    :z-index  1}))
+  [{:keys [derived-value]} {:keys [top]} insets max-height]
+  (let [initial-top (- (+ (:top insets)
+                          constants/top-view-height))]
+    (reanimated/apply-animations-to-style
+     {:opacity (reanimated/interpolate derived-value [(- max-height 20) max-height] [0 1])
+      :top     (reanimated/interpolate top
+                                       [0 (- max-height)]
+                                       [initial-top (+ (- max-height) initial-top)]
+                                       {:extrapolateLeft  "clamp"
+                                        :extrapolateRight "clamp"})}
+     {:position :absolute
+      :left     0
+      :right    0
+      :height   (+ (:top insets)
+                   constants/top-view-height
+                   ;;constants/bar-container-height
+                   ;;constants/text-margin
+                   (* constants/line-height 2))
+      :z-index  1})))
 
 (def bottom-gradient
   {:position :absolute
    :left     0
    :right    0
-   :height   28
-   :bottom   0
+   :height   (+ 40 constants/small-list-height)
+   :bottom   (- constants/small-list-height)
    :z-index  1})
