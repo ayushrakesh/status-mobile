@@ -8,9 +8,9 @@
     [react-native.navigation :as navigation]
     [react-native.platform :as platform]
     [reagent.core :as reagent]
-    [status-im.multiaccounts.core :as multiaccounts]
     [status-im.ui.components.list-selection :as list-selection]
     [status-im2.common.qr-codes.view :as qr-codes]
+    [status-im2.contexts.profile.utils :as profile.utils]
     [status-im2.contexts.shell.share.style :as style]
     [utils.address :as address]
     [utils.i18n :as i18n]
@@ -46,11 +46,11 @@
 
 (defn profile-tab
   [window-width]
-  (let [{:keys [emoji-hash compressed-key customization-color display-name]
+  (let [{:keys [emoji-hash compressed-key
+                customization-color]
          :as   profile}   (rf/sub [:profile/profile])
         qr-size           (int (- window-width 64))
         profile-url       (str image-server/status-profile-base-url compressed-key)
-        profile-photo-uri (:uri (multiaccounts/displayed-photo profile))
         abbreviated-url   (address/get-abbreviated-profile-url
                            image-server/status-profile-base-url-without-https
                            compressed-key)
@@ -61,9 +61,9 @@
        {:url                 profile-url
         :size                qr-size
         :avatar              :profile
-        :full-name           display-name
+        :full-name           (profile.utils/displayed-name profile)
         :customization-color customization-color
-        :profile-picture     profile-photo-uri}]
+        :profile-picture     (:uri (profile.utils/photo profile))}]
       [rn/view {:style style/profile-address-container}
        [rn/view {:style style/profile-address-column}
         [quo/text

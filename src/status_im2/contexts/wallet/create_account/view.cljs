@@ -19,7 +19,7 @@
         account-color        (reagent/atom :blue)
         emoji                (reagent/atom diamond-emoji)
         {:keys [public-key]} (rf/sub [:profile/profile])
-        display-name         (first (rf/sub [:contacts/contact-two-names-by-identity public-key]))]
+        [primary-name _]     (rf/sub [:contacts/contact-two-names-by-identity public-key])]
     (fn [{:keys [theme]}]
       [rn/view
        {:style {:flex       1
@@ -74,7 +74,7 @@
        [quo/category
         {:list-type :settings
          :label     (i18n/label :t/origin)
-         :data      (temp/create-account-state display-name)}]
+         :data      (temp/create-account-state primary-name)}]
        [quo/slide-button
         {:track-text          (i18n/label :t/slide-to-sign)
          :track-icon          :face-id

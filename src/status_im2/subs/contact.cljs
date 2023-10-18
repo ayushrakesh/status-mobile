@@ -4,10 +4,9 @@
     [quo.theme :as theme]
     [re-frame.core :as re-frame]
     [status-im.contact.db :as contact.db]
-    [status-im.multiaccounts.core :as multiaccounts]
     [status-im.ui.screens.profile.visibility-status.utils :as visibility-status-utils]
-    [status-im.utils.gfycat.core :as gfycat]
     [status-im2.constants :as constants]
+    [status-im2.contexts.profile.utils :as profile.utils]
     [utils.address :as address]
     [utils.collection]
     [utils.i18n :as i18n]
@@ -213,7 +212,7 @@
  :contacts/contact-by-identity
  :<- [:contacts/contacts]
  (fn [contacts [_ contact-identity]]
-   (multiaccounts/contact-by-identity contacts contact-identity)))
+   (get contacts contact-identity {:public-key contact-identity})))
 
 (re-frame/reg-sub
  :contacts/contact-added?
@@ -234,40 +233,12 @@
  (fn [[_ contact-identity] _]
    [(re-frame/subscribe [:contacts/contact-by-identity contact-identity])
     (re-frame/subscribe [:profile/profile])])
- (fn [[contact current-multiaccount] [_ contact-identity]]
-   (multiaccounts/contact-two-names-by-identity contact
-                                                current-multiaccount
-                                                contact-identity)))
-
-(re-frame/reg-sub
- :contacts/contact-name-by-identity
- (fn [[_ contact-identity] _]
-   [(re-frame/subscribe [:contacts/contact-two-names-by-identity contact-identity])])
- (fn [[names] _]
-   (first names)))
-
-(re-frame/reg-sub
- :messages/quote-info
- :<- [:chats/messages]
- :<- [:contacts/contacts]
- :<- [:profile/profile]
- (fn [[messages contacts current-multiaccount] [_ message-id]]
-   (when-let [message (get messages message-id)]
-     (let [from-identity (:from message)
-           me?           (= (:public-key current-multiaccount) from-identity)]
-       (if me?
-         {:quote    {:from from-identity
-                     :text (get-in message [:content :text])}
-          :ens-name (:preferred-name current-multiaccount)
-          :alias    (gfycat/generate-gfy from-identity)}
-         (let [contact (or (contacts from-identity)
-                           (contact.db/public-key->new-contact from-identity))]
-           {:quote    {:from from-identity
-                       :text (get-in message [:content :text])}
-            :ens-name (when (:ens-verified contact)
-                        (:name contact))
-            :alias    (or (:alias contact)
-                          (gfycat/generate-gfy from-identity))}))))))
+ (fn [[contact current-profile] [_ contact-identity]]
+   (let [contact' (if (= (:public-key current-profile) contact-identity)
+                    (assoc contact :display-name (:display-name current-profile))
+                    contact)]
+     [(profile.utils/displayed-name contact')
+      (:secondary-name contact)])))
 
 (re-frame/reg-sub
  :contacts/all-contacts-not-in-current-chat
