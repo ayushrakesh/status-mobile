@@ -13,7 +13,7 @@
     [status-im2.contexts.chat.lightbox.text-sheet.utils :as utils]
     [status-im2.contexts.chat.messages.content.text.view :as message-view]))
 
-(defn text-sheet
+(defn- text-sheet
   [messages overlay-opacity overlay-z-index text-sheet-lock?]
   (let [text-height (reagent/atom 0)
         expanded?   (reagent/atom false)
@@ -29,13 +29,12 @@
                                          (when platform/ios? (:top insets)))
             full-height               (+ constants/bar-container-height
                                          constants/text-margin
-                                         (* 2 constants/line-height)
+                                         constants/line-height
                                          @text-height)
             expanded-height           (min max-height full-height)
             animations                (utils/init-animations overlay-opacity)
             derived                   (utils/init-derived-animations animations)
             expanding-message?        (> @text-height (* constants/line-height 2))]
-        (println content)
         [gesture/gesture-detector
          {:gesture (utils/sheet-gesture animations
                                         expanded-height
@@ -67,16 +66,18 @@
               [rn/view {:style style/bar-container}
                [rn/view {:style style/bar}]])
             [linear-gradient/linear-gradient
-             {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-80 colors/neutral-100-opa-0]
+             {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-70 colors/neutral-100-opa-0]
               :start     {:x 0 :y 1}
               :end       {:x 0 :y 0}
               :locations [0.7 0.8]
               :style     style/bottom-gradient}]
             [gesture/scroll-view
-             {:scroll-enabled        false
-              :scroll-event-throttle 16
-              :bounces               false
-              :style                 {:height (- max-height constants/bar-container-height)}}
+             {:scroll-enabled          false
+              :scroll-event-throttle   16
+              :bounces                 false
+              :style                   {:height (- max-height constants/bar-container-height)}
+              :content-container-style {:padding-top (when (not expanding-message?)
+                                                       constants/bar-container-height)}}
              [message-view/render-parsed-text
               {:content        content
                :chat-id        chat-id

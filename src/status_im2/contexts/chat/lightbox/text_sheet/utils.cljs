@@ -29,8 +29,7 @@
              (reanimated/set-shared-value overlay-opacity progress)
              (reanimated/set-shared-value derived-value (- new-value))))))
       (gesture/on-end
-       (fn [e]
-         (println e)
+       (fn []
          (if (or (and
                   (not (> (reanimated/get-shared-value derived-value) max-height))
                   (> (- (reanimated/get-shared-value derived-value))

@@ -17,7 +17,6 @@
   [expanding-message?]
   {:color             colors/white
    :margin-horizontal 20
-   :margin-bottom     constants/text-margin
    :align-items       (if expanding-message? nil :center)
    :flex-grow         1})
 
@@ -62,6 +61,7 @@
   {:position :absolute
    :left     0
    :right    0
-   :height   (+ 40 constants/small-list-height)
+   :height   (+ constants/small-list-height (* 2 constants/line-height))
    :bottom   (- constants/small-list-height)
+   :opacity  0.8
    :z-index  1})
