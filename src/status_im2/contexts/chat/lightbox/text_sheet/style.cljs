@@ -6,16 +6,12 @@
 
 (defn sheet-container
   [{:keys [height top]}]
-  (let [top-bound (- (- constants/text-min-height 10))]
-    (reanimated/apply-animations-to-style
-     {:height height
-      :top    (reanimated/interpolate top
-                                      [top-bound (dec top-bound)]
-                                      [top-bound (dec top-bound)]
-                                      {:extrapolateLeft "clamp" :extrapolateRight "identity"})}
-     {:position :absolute
-      :left     0
-      :right    0})))
+  (reanimated/apply-animations-to-style
+   {:height height
+    :top    top}
+   {:position :absolute
+    :left     0
+    :right    0}))
 
 (def text-style
   {:color             colors/white
@@ -44,10 +40,12 @@
   (let [initial-top (- (+ (:top insets)
                           constants/top-view-height))]
     (reanimated/apply-animations-to-style
-     {:opacity (reanimated/interpolate derived-value [(- max-height 20) max-height] [0 1])
+     {:opacity (reanimated/interpolate derived-value
+                                       [max-height (+ max-height constants/line-height)]
+                                       [0 1])
       :top     (reanimated/interpolate top
                                        [0 (- max-height)]
-                                       [initial-top (+ (- max-height) initial-top)]
+                                       [initial-top (- initial-top max-height)]
                                        {:extrapolateLeft  "clamp"
                                         :extrapolateRight "clamp"})}
      {:position :absolute
@@ -55,8 +53,6 @@
       :right    0
       :height   (+ (:top insets)
                    constants/top-view-height
-                   ;;constants/bar-container-height
-                   ;;constants/text-margin
                    (* constants/line-height 2))
       :z-index  1})))
 

@@ -34,8 +34,9 @@
                                          (:bottom insets)
                                          (when platform/ios? (:top insets)))
             full-height               (+ constants/bar-container-height
-                                         @text-height
-                                         constants/text-margin)
+                                         constants/text-margin
+                                         (* 2 constants/line-height)
+                                         @text-height)
             expanded-height           (min max-height full-height)
             animations                (utils/init-animations overlay-opacity)
             derived                   (utils/init-derived-animations animations)]
@@ -47,41 +48,41 @@
                                         overlay-z-index
                                         expanded?
                                         dragging?)}
-         [rn/view
-          [reanimated/linear-gradient
-           {:colors    [colors/neutral-100-opa-0 colors/neutral-100]
-            :locations [0 0.3]
-            :start     {:x 0 :y 1}
-            :end       {:x 0 :y 0}
-            :style     (style/top-gradient animations derived insets max-height)}]
-          [reanimated/touchable-opacity
-           {:active-opacity 1
-            :on-press
-            #(utils/expand-sheet animations
-                                 expanded-height
-                                 max-height
-                                 overlay-z-index
-                                 expanded?
-                                 text-sheet-lock?)
-            :style (style/sheet-container derived)}
-           [bar @text-height]
-           [linear-gradient/linear-gradient
-            {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-80 colors/neutral-100-opa-0]
+         [gesture/gesture-detector
+          {:gesture (-> (gesture/gesture-tap)
+                        (gesture/on-start (fn []
+                                            (utils/expand-sheet animations
+                                                                expanded-height
+                                                                max-height
+                                                                overlay-z-index
+                                                                expanded?
+                                                                text-sheet-lock?))))}
+          [rn/view
+           [reanimated/linear-gradient
+            {:colors    [colors/neutral-100-opa-0 colors/neutral-100]
+             :locations [0 0.3]
              :start     {:x 0 :y 1}
              :end       {:x 0 :y 0}
-             :locations [0.7 0.8]
-             :style     style/bottom-gradient}]
-           [gesture/scroll-view
-            {:scroll-enabled        @expanded?
-             :scroll-event-throttle 16
-             :bounces               false
-             ;;:on-scroll             #(utils/on-scroll % @expanded? @dragging? animations)
-             :style                 {:height (- max-height constants/bar-container-height)}}
-            [message-view/render-parsed-text
-             {:content        content
-              :chat-id        chat-id
-              :style-override style/text-style
-              :on-layout      #(utils/on-layout % text-height)}]]]]]))))
+             :style     (style/top-gradient animations derived insets max-height)}]
+           [reanimated/view
+            {:style (style/sheet-container derived)}
+            [bar @text-height]
+            [linear-gradient/linear-gradient
+             {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-80 colors/neutral-100-opa-0]
+              :start     {:x 0 :y 1}
+              :end       {:x 0 :y 0}
+              :locations [0.7 0.8]
+              :style     style/bottom-gradient}]
+            [gesture/scroll-view
+             {:scroll-enabled        false
+              :scroll-event-throttle 16
+              :bounces               false
+              :style                 {:height (- max-height constants/bar-container-height)}}
+             [message-view/render-parsed-text
+              {:content        content
+               :chat-id        chat-id
+               :style-override style/text-style
+               :on-layout      #(utils/on-layout % text-height)}]]]]]]))))
 
 (defn view
   [messages {:keys [overlay-opacity]} {:keys [overlay-z-index]} {:keys [text-sheet-lock?]}]

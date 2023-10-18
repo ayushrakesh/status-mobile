@@ -21,15 +21,15 @@
                old-value       (reanimated/get-shared-value saved-top)
                new-value       (+ old-value event-value)
                progress        (/ (- new-value) expanded-height)
-               upper-boundery? (< new-value
-                                  (- 0 full-height constants/text-margin constants/text-min-height))
+               upper-boundery? (< new-value (- full-height))
                lower-boundary? (and (> new-value (- constants/text-min-height))
                                     (pos? event-value))]
            (when (and (not upper-boundery?) (not lower-boundary?))
              (reanimated/set-shared-value overlay-opacity progress)
              (reanimated/set-shared-value derived-value (- new-value))))))
       (gesture/on-end
-       (fn []
+       (fn [e]
+         (println e)
          (if (or (and
                   (not (> (reanimated/get-shared-value derived-value) max-height))
                   (> (- (reanimated/get-shared-value derived-value))
@@ -53,7 +53,7 @@
    expanded-height max-height overlay-z-index expanded? text-sheet-lock?]
   (when-not @text-sheet-lock?
     (reanimated/animate derived-value expanded-height)
-    ;;(reanimated/animate overlay-opacity (/ expanded-height max-height))
+    (reanimated/animate overlay-opacity (/ expanded-height max-height))
     (reanimated/set-shared-value saved-top (- expanded-height))
     (reset! overlay-z-index 1)
     (reset! expanded? true)))
