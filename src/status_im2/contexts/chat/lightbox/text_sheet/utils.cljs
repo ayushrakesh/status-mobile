@@ -8,8 +8,9 @@
 
 (defn sheet-gesture
   [{:keys [derived-value saved-top overlay-opacity gradient-opacity]}
-   expanded-height max-height full-height overlay-z-index expanded? dragging?]
+   expanded-height max-height full-height overlay-z-index expanded? dragging? expanding-message?]
   (-> (gesture/gesture-pan)
+      (gesture/enabled expanding-message?)
       (gesture/on-start (fn []
                           (reset! overlay-z-index 1)
                           (reset! dragging? true)

@@ -13,12 +13,6 @@
     [status-im2.contexts.chat.lightbox.text-sheet.utils :as utils]
     [status-im2.contexts.chat.messages.content.text.view :as message-view]))
 
-(defn bar
-  [text-height]
-  (when (> text-height (* constants/line-height 2))
-    [rn/view {:style style/bar-container}
-     [rn/view {:style style/bar}]]))
-
 (defn text-sheet
   [messages overlay-opacity overlay-z-index text-sheet-lock?]
   (let [text-height (reagent/atom 0)
@@ -39,7 +33,9 @@
                                          @text-height)
             expanded-height           (min max-height full-height)
             animations                (utils/init-animations overlay-opacity)
-            derived                   (utils/init-derived-animations animations)]
+            derived                   (utils/init-derived-animations animations)
+            expanding-message?        (> @text-height (* constants/line-height 2))]
+        (println content)
         [gesture/gesture-detector
          {:gesture (utils/sheet-gesture animations
                                         expanded-height
@@ -47,9 +43,11 @@
                                         full-height
                                         overlay-z-index
                                         expanded?
-                                        dragging?)}
+                                        dragging?
+                                        expanding-message?)}
          [gesture/gesture-detector
           {:gesture (-> (gesture/gesture-tap)
+                        (gesture/enabled expanding-message?)
                         (gesture/on-start (fn []
                                             (utils/expand-sheet animations
                                                                 expanded-height
@@ -64,9 +62,10 @@
              :start     {:x 0 :y 1}
              :end       {:x 0 :y 0}
              :style     (style/top-gradient animations derived insets max-height)}]
-           [reanimated/view
-            {:style (style/sheet-container derived)}
-            [bar @text-height]
+           [reanimated/view {:style (style/sheet-container derived)}
+            (when expanding-message?
+              [rn/view {:style style/bar-container}
+               [rn/view {:style style/bar}]])
             [linear-gradient/linear-gradient
              {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-80 colors/neutral-100-opa-0]
               :start     {:x 0 :y 1}
@@ -81,7 +80,7 @@
              [message-view/render-parsed-text
               {:content        content
                :chat-id        chat-id
-               :style-override style/text-style
+               :style-override (style/text-style expanding-message?)
                :on-layout      #(utils/on-layout % text-height)}]]]]]]))))
 
 (defn view

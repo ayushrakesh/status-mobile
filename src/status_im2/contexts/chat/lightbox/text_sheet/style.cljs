@@ -13,10 +13,12 @@
     :left     0
     :right    0}))
 
-(def text-style
+(defn text-style
+  [expanding-message?]
   {:color             colors/white
    :margin-horizontal 20
    :margin-bottom     constants/text-margin
+   :align-items       (if expanding-message? nil :center)
    :flex-grow         1})
 
 (def bar-container
