@@ -70,7 +70,7 @@
              {:colors    [colors/neutral-100-opa-100 colors/neutral-100-opa-70 colors/neutral-100-opa-0]
               :start     {:x 0 :y 1}
               :end       {:x 0 :y 0}
-              :locations [0.7 0.8]
+              :locations [0.7 0.8 1]
               :style     style/bottom-gradient}]
             [gesture/scroll-view
              {:scroll-enabled          false
