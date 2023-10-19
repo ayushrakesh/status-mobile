@@ -70,7 +70,7 @@
     :overflow       :visible
     :bottom         0
     :padding-bottom (:bottom insets)
-    :padding-top    c/bottom-view-extra-gradient
+    :padding-top    c/text-min-height
     :z-index        3}))
 
 (defn content-container

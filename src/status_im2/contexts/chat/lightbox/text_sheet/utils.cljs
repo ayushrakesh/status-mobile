@@ -3,8 +3,15 @@
     [oops.core :as oops]
     [react-native.gesture :as gesture]
     [react-native.reanimated :as reanimated]
-    [status-im2.contexts.chat.lightbox.constants :as constants]
-    [utils.worklets.lightbox :as worklet]))
+    [status-im2.contexts.chat.lightbox.constants :as constants]))
+
+(defn- collapse-sheet
+  [{:keys [derived-value overlay-opacity saved-top expanded? overlay-z-index]}]
+  (reanimated/animate derived-value constants/text-min-height)
+  (reanimated/animate overlay-opacity 0)
+  (reanimated/set-shared-value saved-top (- constants/text-min-height))
+  (reset! expanded? false)
+  (js/setTimeout #(reset! overlay-z-index 0) 300))
 
 (defn sheet-gesture
   [{:keys [derived-value saved-top overlay-opacity gradient-opacity]}
@@ -27,23 +34,26 @@
                                     (pos? event-value))]
            (when (and (not upper-boundery?) (not lower-boundary?))
              (reanimated/set-shared-value overlay-opacity progress)
-             (reanimated/set-shared-value derived-value (- new-value))))))
+             (reanimated/set-shared-value derived-value (- new-value)))
+           (when lower-boundary?
+             (collapse-sheet {:derived-value   derived-value
+                              :overlay-opacity overlay-opacity
+                              :saved-top       saved-top
+                              :expanded?       expanded?
+                              :overlay-z-index overlay-z-index})))))
       (gesture/on-end
        (fn []
-         (if (or (and
-                  (not (> (reanimated/get-shared-value derived-value) max-height))
-                  (> (- (reanimated/get-shared-value derived-value))
-                     (reanimated/get-shared-value saved-top)))
-                 (= (reanimated/get-shared-value derived-value)
-                    constants/text-min-height))
-           (do ; minimize
-             (reanimated/animate derived-value constants/text-min-height)
-             (reanimated/animate overlay-opacity 0)
-             (reanimated/set-shared-value saved-top (- constants/text-min-height))
-             (reset! expanded? false)
-             (js/setTimeout #(reset! overlay-z-index 0) 300))
-           (reanimated/set-shared-value saved-top
-                                        (- (reanimated/get-shared-value derived-value))))
+         (let [below-max-height? (< (reanimated/get-shared-value derived-value) max-height)
+               below-saved-top?  (> (- (reanimated/get-shared-value derived-value))
+                                    (reanimated/get-shared-value saved-top))]
+           (if (and below-max-height? below-saved-top?)
+             (collapse-sheet {:derived-value   derived-value
+                              :overlay-opacity overlay-opacity
+                              :saved-top       saved-top
+                              :expanded?       expanded?
+                              :overlay-z-index overlay-z-index})
+             (reanimated/set-shared-value saved-top
+                                          (- (reanimated/get-shared-value derived-value)))))
          (when (= (reanimated/get-shared-value derived-value) expanded-height)
            (reset! expanded? true))
          (reset! dragging? false)))))
@@ -71,5 +81,5 @@
 
 (defn init-derived-animations
   [{:keys [derived-value]}]
-  {:height (worklet/text-sheet derived-value true)
-   :top    (worklet/text-sheet derived-value false)})
+  {:height derived-value
+   :top    (reanimated/interpolate derived-value [0 1] [0 -1])})

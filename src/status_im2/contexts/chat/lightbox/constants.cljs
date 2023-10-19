@@ -8,7 +8,6 @@
 (def ^:const top-view-height 56)
 (def ^:const separator-width 16)
 (def ^:const drag-threshold 100)
-(def ^:const bottom-view-extra-gradient 200)
 
 ;;; TEXT SHEET
 (def ^:const text-margin 12)

@@ -35,32 +35,33 @@
             animations                (utils/init-animations overlay-opacity)
             derived                   (utils/init-derived-animations animations)
             expanding-message?        (> @text-height (* constants/line-height 2))]
-        [gesture/gesture-detector
-         {:gesture (utils/sheet-gesture animations
-                                        expanded-height
-                                        max-height
-                                        full-height
-                                        overlay-z-index
-                                        expanded?
-                                        dragging?
-                                        expanding-message?)}
+        [rn/view
+         [reanimated/linear-gradient
+          {:colors         [colors/neutral-100-opa-0 colors/neutral-100]
+           :pointer-events :none
+           :locations      [0 0.3]
+           :start          {:x 0 :y 1}
+           :end            {:x 0 :y 0}
+           :style          (style/top-gradient animations derived insets max-height)}]
          [gesture/gesture-detector
-          {:gesture (-> (gesture/gesture-tap)
-                        (gesture/enabled expanding-message?)
-                        (gesture/on-start (fn []
-                                            (utils/expand-sheet animations
-                                                                expanded-height
-                                                                max-height
-                                                                overlay-z-index
-                                                                expanded?
-                                                                text-sheet-lock?))))}
-          [rn/view
-           [reanimated/linear-gradient
-            {:colors    [colors/neutral-100-opa-0 colors/neutral-100]
-             :locations [0 0.3]
-             :start     {:x 0 :y 1}
-             :end       {:x 0 :y 0}
-             :style     (style/top-gradient animations derived insets max-height)}]
+          {:gesture (utils/sheet-gesture animations
+                                         expanded-height
+                                         max-height
+                                         full-height
+                                         overlay-z-index
+                                         expanded?
+                                         dragging?
+                                         expanding-message?)}
+          [gesture/gesture-detector
+           {:gesture (-> (gesture/gesture-tap)
+                         (gesture/enabled expanding-message?)
+                         (gesture/on-start (fn []
+                                             (utils/expand-sheet animations
+                                                                 expanded-height
+                                                                 max-height
+                                                                 overlay-z-index
+                                                                 expanded?
+                                                                 text-sheet-lock?))))}
            [reanimated/view {:style (style/sheet-container derived)}
             (when expanding-message?
               [rn/view {:style style/bar-container}

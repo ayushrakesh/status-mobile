@@ -39,7 +39,10 @@
 (defn top-gradient
   [{:keys [derived-value]} {:keys [top]} insets max-height]
   (let [initial-top (- (+ (:top insets)
-                          constants/top-view-height))]
+                          constants/top-view-height))
+        height      (+ (:top insets)
+                       constants/top-view-height
+                       (* constants/line-height 2))]
     (reanimated/apply-animations-to-style
      {:opacity (reanimated/interpolate derived-value
                                        [max-height (+ max-height constants/line-height)]
@@ -51,10 +54,8 @@
                                         :extrapolateRight "clamp"})}
      {:position :absolute
       :left     0
+      :height   height
       :right    0
-      :height   (+ (:top insets)
-                   constants/top-view-height
-                   (* constants/line-height 2))
       :z-index  1})))
 
 (def bottom-gradient
