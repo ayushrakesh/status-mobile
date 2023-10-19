@@ -16,47 +16,48 @@
 (defn sheet-gesture
   [{:keys [derived-value saved-top overlay-opacity gradient-opacity]}
    expanded-height max-height full-height overlay-z-index expanded? dragging? expanding-message?]
-  (-> (gesture/gesture-pan)
-      (gesture/enabled expanding-message?)
-      (gesture/on-start (fn []
-                          (reset! overlay-z-index 1)
-                          (reset! dragging? true)
-                          (when (not expanded?)
-                            (reanimated/animate gradient-opacity 0))))
-      (gesture/on-update
-       (fn [e]
-         (let [event-value     (oops/oget e "translationY")
-               old-value       (reanimated/get-shared-value saved-top)
-               new-value       (+ old-value event-value)
-               progress        (/ (- new-value) max-height)
-               upper-boundery? (< new-value (- full-height))
-               lower-boundary? (and (> new-value (- constants/text-min-height))
-                                    (pos? event-value))]
-           (when (and (not upper-boundery?) (not lower-boundary?))
-             (reanimated/set-shared-value overlay-opacity progress)
-             (reanimated/set-shared-value derived-value (- new-value)))
-           (when lower-boundary?
-             (collapse-sheet {:derived-value   derived-value
-                              :overlay-opacity overlay-opacity
-                              :saved-top       saved-top
-                              :expanded?       expanded?
-                              :overlay-z-index overlay-z-index})))))
-      (gesture/on-end
-       (fn []
-         (let [below-max-height? (< (reanimated/get-shared-value derived-value) max-height)
-               below-saved-top?  (> (- (reanimated/get-shared-value derived-value))
-                                    (reanimated/get-shared-value saved-top))]
-           (if (and below-max-height? below-saved-top?)
-             (collapse-sheet {:derived-value   derived-value
-                              :overlay-opacity overlay-opacity
-                              :saved-top       saved-top
-                              :expanded?       expanded?
-                              :overlay-z-index overlay-z-index})
-             (reanimated/set-shared-value saved-top
-                                          (- (reanimated/get-shared-value derived-value)))))
-         (when (= (reanimated/get-shared-value derived-value) expanded-height)
-           (reset! expanded? true))
-         (reset! dragging? false)))))
+  (let [shared-derived-value (reanimated/get-shared-value derived-value)]
+    (-> (gesture/gesture-pan)
+        (gesture/enabled expanding-message?)
+        (gesture/on-start (fn []
+                            (reset! overlay-z-index 1)
+                            (reset! dragging? true)
+                            (when (not expanded?)
+                              (reanimated/animate gradient-opacity 0))))
+        (gesture/on-update
+         (fn [e]
+           (let [event-value     (oops/oget e :translationY)
+                 old-value       (reanimated/get-shared-value saved-top)
+                 new-value       (+ old-value event-value)
+                 progress        (/ (- new-value) max-height)
+                 upper-boundery? (< new-value (- full-height))
+                 lower-boundary? (and (> new-value (- constants/text-min-height))
+                                      (pos? event-value))]
+             (when (and (not upper-boundery?) (not lower-boundary?))
+               (reanimated/set-shared-value overlay-opacity progress)
+               (reanimated/set-shared-value derived-value (- new-value)))
+             (when lower-boundary?
+               (collapse-sheet {:derived-value   derived-value
+                                :overlay-opacity overlay-opacity
+                                :saved-top       saved-top
+                                :expanded?       expanded?
+                                :overlay-z-index overlay-z-index})))))
+        (gesture/on-end
+         (fn []
+           (let [below-max-height? (< shared-derived-value max-height)
+                 below-saved-top?  (> (- shared-derived-value)
+                                      (reanimated/get-shared-value saved-top))]
+             (if (and below-max-height? below-saved-top?)
+               (collapse-sheet {:derived-value   derived-value
+                                :overlay-opacity overlay-opacity
+                                :saved-top       saved-top
+                                :expanded?       expanded?
+                                :overlay-z-index overlay-z-index})
+               (reanimated/set-shared-value saved-top
+                                            (- shared-derived-value))))
+           (when (= shared-derived-value expanded-height)
+             (reset! expanded? true))
+           (reset! dragging? false))))))
 
 (defn expand-sheet
   [{:keys [derived-value overlay-opacity saved-top]}
