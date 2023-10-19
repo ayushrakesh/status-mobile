@@ -17,7 +17,7 @@
   [expanding-message?]
   {:color             colors/white
    :margin-horizontal 20
-   :align-items       (if expanding-message? nil :center)
+   :align-items       (when-not expanding-message? :center)
    :flex-grow         1})
 
 (def bar-container
