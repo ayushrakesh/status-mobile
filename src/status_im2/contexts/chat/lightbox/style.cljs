@@ -62,12 +62,13 @@
 
 ;;;; BOTTOM-VIEW
 (defn gradient-container
-  [insets {:keys [opacity]} {:keys [bottom-layout]}]
+  [insets {:keys [opacity]} {:keys [bottom-layout]} transparent?]
   (reanimated/apply-animations-to-style
    {:transform [{:translateY bottom-layout}]
     :opacity   opacity}
    {:position       :absolute
     :overflow       :visible
+    :display        (if @transparent? :none :flex)
     :bottom         0
     :padding-bottom (:bottom insets)
     :padding-top    c/text-min-height

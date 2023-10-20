@@ -108,7 +108,10 @@
          :shows-vertical-scroll-indicator   false
          :shows-horizontal-scroll-indicator false
          :on-viewable-items-changed         handle-items-changed}]]]
-     (when (and (not landscape?) (not @transparent?))
+     ;; NOTE: not un-mounting bottom-view based on `transparent?` (like we do with the top-view
+     ;;       above), since we need to save the state of the text-sheet position. Instead, we use
+     ;;       the `:display` style property to hide the bottom-sheet.
+     (when (not landscape?)
        [:f> bottom-view/bottom-view messages index scroll-index insets animations derived
         item-width props state transparent?])]))
 

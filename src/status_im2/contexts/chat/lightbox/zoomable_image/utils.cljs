@@ -115,21 +115,7 @@
         opacity                                          (reanimated/get-shared-value opacity-value)
         scale-value                                      (inc (/ constants/margin
                                                                  (:width (rn/get-window))))]
-    (if (= opacity 1)
-      (do
-        (js/clearTimeout (:show-0 @timers))
-        (js/clearTimeout (:show-1 @timers))
-        (js/clearTimeout (:show-2 @timers))
-        (swap! timers assoc
-          :hide-0
-          (js/setTimeout #(navigation/merge-options "lightbox" {:statusBar {:visible false}})
-                         (if platform/ios? 75 0)))
-        (anim/animate opacity-value 0)
-        (reset! last-overlay-opacity (anim/get-val overlay-opacity))
-        (anim/animate overlay-opacity 0)
-        (swap! timers assoc :hide-1 (js/setTimeout #(reset! transparent? (not @transparent?)) 400))
-        (reset! text-sheet-lock? true)
-        (js/setTimeout #(reset! text-sheet-lock? false) 300))
+    (if @transparent?
       (do
         (js/clearTimeout (:hide-0 @timers))
         (js/clearTimeout (:hide-1 @timers))
@@ -145,13 +131,29 @@
           (js/setTimeout #(when @small-list-ref
                             (.scrollToIndex ^js @small-list-ref #js {:animated false :index index}))
                          100))
+        (anim/animate border-value 16)
+        (anim/animate full-screen-scale 1)
         (when portrait?
           (swap! timers assoc
             :show-2
             (js/setTimeout #(navigation/merge-options "lightbox" {:statusBar {:visible true}})
-                           (if platform/ios? 150 50))))))
-    (anim/animate border-value (if (= opacity 1) 0 16))
-    (anim/animate full-screen-scale (if (= opacity 1) scale-value 1))))
+                           (if platform/ios? 150 50)))))
+      (do
+        (js/clearTimeout (:show-0 @timers))
+        (js/clearTimeout (:show-1 @timers))
+        (js/clearTimeout (:show-2 @timers))
+        (swap! timers assoc
+          :hide-0
+          (js/setTimeout #(navigation/merge-options "lightbox" {:statusBar {:visible false}})
+                         (if platform/ios? 75 0)))
+        (anim/animate opacity-value 0)
+        (reset! last-overlay-opacity (anim/get-val overlay-opacity))
+        (anim/animate overlay-opacity 0)
+        (anim/animate border-value 0)
+        (anim/animate full-screen-scale scale-value)
+        (swap! timers assoc :hide-1 (js/setTimeout #(reset! transparent? (not @transparent?)) 400))
+        (reset! text-sheet-lock? true)
+        (js/setTimeout #(reset! text-sheet-lock? false) 300)))))
 
 ;;; Dimensions
 (defn get-dimensions

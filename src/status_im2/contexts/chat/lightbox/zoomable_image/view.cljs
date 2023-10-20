@@ -6,11 +6,11 @@
     [react-native.orientation :as orientation]
     [react-native.platform :as platform]
     [react-native.reanimated :as reanimated]
+    [reagent.core :as r]
     [status-im2.contexts.chat.lightbox.animations :as anim]
     [status-im2.contexts.chat.lightbox.zoomable-image.constants :as c]
     [status-im2.contexts.chat.lightbox.zoomable-image.style :as style]
     [status-im2.contexts.chat.lightbox.zoomable-image.utils :as utils]
-    [reagent.core :as r]
     [utils.re-frame :as rf]
     [utils.url :as url]))
 
