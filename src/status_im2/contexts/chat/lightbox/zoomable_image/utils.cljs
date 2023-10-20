@@ -112,7 +112,6 @@
            props]}
    portrait? last-overlay-opacity]
   (let [{:keys [small-list-ref timers text-sheet-lock?]} props
-        opacity                                          (reanimated/get-shared-value opacity-value)
         scale-value                                      (inc (/ constants/margin
                                                                  (:width (rn/get-window))))]
     (if @transparent?
