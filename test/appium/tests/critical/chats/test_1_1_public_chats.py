@@ -548,6 +548,11 @@ class TestOneToOneChatMultipleSharedDevicesNewUiTwo(MultipleSharedDeviceTestCase
         self.message_1, self.message_2, self.message_3, self.message_4 = \
             "Message 1", "Message 2", "Message 3", "Message 4"
 
+    def test_1_1_chat_send_image_with_camera(self):
+        self.chat_1.send_image_with_camera(description="camera test")
+
+
+
     @marks.testrail_id(702783)
     @marks.xfail(reason="Data delivery issue")
     def test_1_1_chat_is_shown_message_sent_delivered_from_offline(self):
