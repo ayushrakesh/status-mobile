@@ -75,7 +75,9 @@
                 {:transform [{:translateY (:pan-y animations)}
                              {:translateX (:pan-x animations)}]}
                 {})}
-       [reanimated/view {:style (style/background animations @(:overlay-z-index state))}]
+       [reanimated/view
+        {:pointer-events :none
+         :style          (style/background animations @(:overlay-z-index state))}]
        [gesture/flat-list
         {:ref                               #(reset! (:flat-list-ref props) %)
          :key-fn                            :message-id
@@ -85,6 +87,7 @@
          :data                              @data
          :render-fn                         image
          :render-data                       {:opacity-value     (:opacity animations)
+                                             :overlay-opacity   (:overlay-opacity animations)
                                              :border-value      (:border animations)
                                              :full-screen-scale (:full-screen-scale animations)
                                              :images-opacity    (:images-opacity animations)
@@ -105,9 +108,9 @@
          :shows-vertical-scroll-indicator   false
          :shows-horizontal-scroll-indicator false
          :on-viewable-items-changed         handle-items-changed}]]]
-     (when (and (not @transparent?) (not landscape?))
+     (when (and (not landscape?) (not @transparent?))
        [:f> bottom-view/bottom-view messages index scroll-index insets animations derived
-        item-width props state])]))
+        item-width props state transparent?])]))
 
 (defn- f-lightbox
   []

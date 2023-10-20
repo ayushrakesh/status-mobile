@@ -54,7 +54,7 @@
                                          expanding-message?)}
           [gesture/gesture-detector
            {:gesture (-> (gesture/gesture-tap)
-                         (gesture/enabled expanding-message?)
+                         (gesture/enabled (and expanding-message? (not @expanded?)))
                          (gesture/on-start (fn []
                                              (utils/expand-sheet animations
                                                                  expanded-height
@@ -71,7 +71,7 @@
               :start     {:x 0 :y 1}
               :end       {:x 0 :y 0}
               :locations [0.7 0.8 1]
-              :style     style/bottom-gradient}]
+              :style     (style/bottom-gradient (:bottom insets))}]
             [gesture/scroll-view
              {:scroll-enabled          false
               :scroll-event-throttle   16

@@ -107,7 +107,10 @@
     (rescale constants/min-scale true)))
 
 (defn toggle-opacity
-  [index {:keys [opacity-value border-value full-screen-scale transparent? props]} portrait?]
+  [index
+   {:keys [opacity-value overlay-opacity border-value full-screen-scale transparent?
+           props]}
+   portrait? last-overlay-opacity]
   (let [{:keys [small-list-ref timers text-sheet-lock?]} props
         opacity                                          (reanimated/get-shared-value opacity-value)
         scale-value                                      (inc (/ constants/margin
@@ -122,6 +125,8 @@
           (js/setTimeout #(navigation/merge-options "lightbox" {:statusBar {:visible false}})
                          (if platform/ios? 75 0)))
         (anim/animate opacity-value 0)
+        (reset! last-overlay-opacity (anim/get-val overlay-opacity))
+        (anim/animate overlay-opacity 0)
         (swap! timers assoc :hide-1 (js/setTimeout #(reset! transparent? (not @transparent?)) 400))
         (reset! text-sheet-lock? true)
         (js/setTimeout #(reset! text-sheet-lock? false) 300))
@@ -129,7 +134,12 @@
         (js/clearTimeout (:hide-0 @timers))
         (js/clearTimeout (:hide-1 @timers))
         (reset! transparent? (not @transparent?))
-        (swap! timers assoc :show-0 (js/setTimeout #(anim/animate opacity-value 1) 50))
+        (swap! timers assoc
+          :show-0
+          (js/setTimeout #((anim/animate opacity-value 1)
+                            (anim/animate overlay-opacity @last-overlay-opacity)
+                            (reset! last-overlay-opacity 0))
+                         50))
         (swap! timers assoc
           :show-1
           (js/setTimeout #(when @small-list-ref

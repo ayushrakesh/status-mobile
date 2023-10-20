@@ -25,16 +25,19 @@
                             (reanimated/animate gradient-opacity 0))))
       (gesture/on-update
        (fn [e]
-         (let [event-value     (oops/oget e :translationY)
-               old-value       (reanimated/get-shared-value saved-top)
-               new-value       (+ old-value event-value)
-               progress        (/ (- new-value) max-height)
-               upper-boundery? (< new-value (- full-height))
-               lower-boundary? (and (> new-value (- constants/text-min-height))
-                                    (pos? event-value))]
-           (when (and (not upper-boundery?) (not lower-boundary?))
+         (let [event-value       (oops/oget e :translationY)
+               old-value         (reanimated/get-shared-value saved-top)
+               new-value         (+ old-value event-value)
+               progress          (/ (- new-value) max-height)
+               reached-expanded? (< new-value (- max-height))
+               upper-boundary?   (< new-value (- full-height))
+               lower-boundary?   (and (> new-value (- constants/text-min-height))
+                                      (pos? event-value))]
+           (when (and (not upper-boundary?) (not lower-boundary?))
+             (reset! expanded? false)
              (reanimated/set-shared-value overlay-opacity progress)
              (reanimated/set-shared-value derived-value (- new-value)))
+           (when reached-expanded? (reset! expanded? true))
            (when lower-boundary?
              (collapse-sheet {:derived-value   derived-value
                               :overlay-opacity overlay-opacity

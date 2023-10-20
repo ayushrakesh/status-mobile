@@ -58,11 +58,13 @@
       :right    0
       :z-index  1})))
 
-(def bottom-gradient
-  {:position :absolute
-   :left     0
-   :right    0
-   :height   (+ constants/small-list-height (* 2 constants/line-height))
-   :bottom   (- constants/small-list-height)
-   :opacity  0.8
-   :z-index  1})
+(defn bottom-gradient
+  [bottom-inset]
+  (let [gradient-distance (+ constants/small-list-height bottom-inset)]
+    {:position :absolute
+     :left     0
+     :right    0
+     :height   (+ gradient-distance (* 2 constants/line-height))
+     :bottom   (- gradient-distance)
+     :opacity  0.8
+     :z-index  1}))
