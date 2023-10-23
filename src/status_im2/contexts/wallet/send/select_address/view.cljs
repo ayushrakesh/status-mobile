@@ -96,7 +96,8 @@
 (defn- suggestion-component
   []
   (fn [{:keys [type ens] :as local-suggestion} _ _ _]
-    (let [props {:on-press      #(js/alert "Not implemented yet")
+    (let [props {:on-press      #(rf/dispatch [:navigate-to-within-stack
+                                               [:wallet-select-asset :wallet-select-address]])
                  :active-state? false}]
       (cond
         (= type types/saved-address)
@@ -168,7 +169,8 @@
                 :type                :primary
                 :disabled?           (not valid-ens-or-address?)
                 :container-style     style/button
-                :on-press            #(js/alert "Not implemented yet")}
+                :on-press            #(rf/dispatch [:navigate-to-within-stack
+                                                    [:wallet-select-asset :wallet-select-address]])}
                (i18n/label :t/continue)])]
            [:<>
             [quo/tabs
