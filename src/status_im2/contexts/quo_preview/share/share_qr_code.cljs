@@ -14,7 +14,7 @@
   []
   (let [state (reagent/atom {:info-button? true
                              :link-title   "Link to profile"
-                             :url          "status.app/u/zQ34e1zlOdas0pKnvrweeedsasas12adjie8"})]
+                             :url          "status.app/u#zQ34e1zlOdas0pKnvrweeedsasas12adjie8"})]
     (fn []
       (let [qr-media-server-uri (image-server/get-qr-image-uri-for-any-url
                                  {:url         (:url @state)
