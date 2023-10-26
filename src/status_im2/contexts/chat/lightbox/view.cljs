@@ -75,9 +75,16 @@
                 {:transform [{:translateY (:pan-y animations)}
                              {:translateX (:pan-x animations)}]}
                 {})}
-       [reanimated/view
-        {:pointer-events :none
-         :style          (style/background animations @(:overlay-z-index state))}]
+       [reanimated/linear-gradient
+        {:colors         [colors/neutral-100-opa-0 colors/neutral-100-opa-0 colors/neutral-100-opa-100
+                          colors/neutral-100]
+         :locations      [0.3 0.4 0.6 1]
+         :pointer-events :none
+         :style          (style/background-bottom-gradient animations @(:overlay-z-index state))}]
+       [reanimated/linear-gradient
+        {:colors         [colors/neutral-100-opa-50 colors/neutral-100]
+         :pointer-events :none
+         :style          (style/background-top-gradient animations @(:overlay-z-index state))}]
        [gesture/flat-list
         {:ref                               #(reset! (:flat-list-ref props) %)
          :key-fn                            :message-id
