@@ -4,7 +4,6 @@
             [react-native.clipboard :as clipboard]
             [react-native.core :as rn]
             [reagent.core :as reagent]
-            [status-im.qr-scanner.core :as qr-scanner]
             [status-im2.contexts.add-new-contact.style :as style]
             [utils.address :as address]
             [utils.debounce :as debounce]
@@ -97,8 +96,9 @@
          {:type       :outline
           :icon-only? true
           :size       40
-          :on-press   #(rf/dispatch [::qr-scanner/scan-code
-                                     {:handler :contacts/qr-code-scanned}])}
+          :on-press   #(rf/dispatch [:open-modal :scan-address
+                                     {:show-subtitle?  false
+                                      :bottom-padding? false}])}
          :i/scan]]])
     (finally
      (rf/dispatch [:contacts/clear-new-identity]))))

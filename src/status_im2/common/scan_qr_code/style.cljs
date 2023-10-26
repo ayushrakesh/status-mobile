@@ -38,10 +38,11 @@
    :padding-horizontal screen-padding
    :margin-vertical    12})
 
-(def header-text
+(defn header-text
+  [bottom-padding?]
   {:padding-horizontal screen-padding
    :padding-top        12
-   :padding-bottom     8
+   :padding-bottom     (when bottom-padding? 8)
    :color              colors/white})
 
 (def header-sub-text
