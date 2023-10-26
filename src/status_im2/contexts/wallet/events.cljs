@@ -1,12 +1,12 @@
 (ns status-im2.contexts.wallet.events
   (:require
     [native-module.core :as native-module]
+    [react-native.background-timer :as background-timer]
+    [status-im2.contexts.wallet.temp :as temp]
     [status-im2.data-store.wallet :as data-store]
     [taoensso.timbre :as log]
     [utils.re-frame :as rf]
-    [utils.security.core :as security]
-    [react-native.background-timer :as background-timer]
-    [utils.re-frame :as re-frame]))
+    [utils.security.core :as security]))
 
 (rf/defn scan-address-success
   {:events [:wallet/scan-address-success]}
@@ -85,35 +85,35 @@
               (cond
                 (= address
                    (get-in
-                    address-local-suggestion-saved-contact-address-mock
+                    temp/address-local-suggestion-saved-contact-address-mock
                     [:accounts 0 :address]))
-                [address-local-suggestion-saved-contact-address-mock]
+                [temp/address-local-suggestion-saved-contact-address-mock]
                 (= address
-                   (get address-local-suggestion-saved-address-mock
+                   (get temp/address-local-suggestion-saved-address-mock
                         :address))
-                [address-local-suggestion-saved-address-mock]
-                :else (find-matching-addresses address))
+                [temp/address-local-suggestion-saved-address-mock]
+                :else (temp/find-matching-addresses address))
               :wallet/valid-ens-or-address?
               false)})
 
-(re-frame/reg-event-fx :wallet/fetch-address-suggestions fetch-address-suggestions)
+(rf/reg-event-fx :wallet/fetch-address-suggestions fetch-address-suggestions)
 
 (defn fetch-ens-suggestions
   [{:keys [db]} [ens]]
   {:db (assoc db
               :wallet/local-suggestions     (if (= ens
-                                                   (:ens ens-local-suggestion-saved-address-mock))
-                                              [ens-local-suggestion-saved-address-mock]
-                                              [ens-local-suggestion-mock])
+                                                   (:ens temp/ens-local-suggestion-saved-address-mock))
+                                              [temp/ens-local-suggestion-saved-address-mock]
+                                              [temp/ens-local-suggestion-mock])
               :wallet/valid-ens-or-address? true)})
 
-(re-frame/reg-event-fx :wallet/ens-validation-success fetch-ens-suggestions)
+(rf/reg-event-fx :wallet/ens-validation-success fetch-ens-suggestions)
 
 (defn address-validation-success
   [{:keys [db]} [_]]
   {:db (assoc db :wallet/valid-ens-or-address? true)})
 
-(re-frame/reg-event-fx :wallet/address-validation-success address-validation-success)
+(rf/reg-event-fx :wallet/address-validation-success address-validation-success)
 
 (defn validate-address
   [{:keys [db]} [address]]
@@ -126,7 +126,7 @@
                 :wallet/valid-ens-or-address? false
                 :wallet/search-timeout        timeout)}))
 
-(re-frame/reg-event-fx :wallet/validate-address validate-address)
+(rf/reg-event-fx :wallet/validate-address validate-address)
 
 (defn validate-ens
   [{:keys [db]} [ens]]
@@ -139,7 +139,7 @@
                 :wallet/valid-ens-or-address? false
                 :wallet/search-timeout        timeout)}))
 
-(re-frame/reg-event-fx :wallet/validate-ens validate-ens)
+(rf/reg-event-fx :wallet/validate-ens validate-ens)
 
 (defn clean-local-suggestions
   [{:keys [db]}]
@@ -147,4 +147,4 @@
     (background-timer/clear-timeout current-timeout)
     {:db (assoc db :wallet/local-suggestions [] :wallet/valid-ens-or-address? false)}))
 
-(re-frame/reg-event-fx :wallet/clean-local-suggestions clean-local-suggestions)
+(rf/reg-event-fx :wallet/clean-local-suggestions clean-local-suggestions)

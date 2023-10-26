@@ -1,6 +1,5 @@
 (ns status-im2.contexts.wallet.send.select-address.view
   (:require
-    [clojure.string :as string]
     [quo.core :as quo]
     [quo.foundations.colors :as colors]
     [quo.theme :as quo.theme]
@@ -91,7 +90,7 @@
     {:size   :paragraph-2
      :weight :monospace
      :style  {:color (colors/theme-colors colors/neutral-100 colors/white theme)}}
-    (string/replace address "x" "×")]])
+    address]])
 
 (defn- suggestion-component
   []
