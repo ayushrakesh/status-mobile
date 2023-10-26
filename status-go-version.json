@@ -3,7 +3,7 @@
     "_comment": "Instead use: scripts/update-status-go.sh <rev>",
     "owner": "status-im",
     "repo": "status-go",
-    "version": "v0.171.7",
-    "commit-sha1": "74396b461df0c18593262a67c9fd79d706287f7a",
-    "src-sha256": "1d46lav3g6m1f6ifpypjlsp2qm82c6yk4478awb8f68azpdkvcg5"
+    "version": "feat/new-deeplink",
+    "commit-sha1": "3eade1b7384f0dcab0fab3d11b9ab07a3ef1df27",
+    "src-sha256": "0qja16zbykh0q4bpv0ildhnimv50rdk1qzxz95ld7vcxw3a9a23h"
 }
