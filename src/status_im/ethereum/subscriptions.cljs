@@ -70,7 +70,6 @@
 
 (rf/defn wallet-owned-collectibles-filtering-done
   [{:keys [db]} {:keys [accounts blockNumber message] :as event}]
-
   (let [response                              (types/json->clj message)
         {:keys [collectibles hasMore offset]} response
         next-offset                           (+ offset (count collectibles))
@@ -84,8 +83,7 @@
          [:wallet/request-collectibles
           {:addresses addresses
            :offset
-           next-offset
-          }]]
+           next-offset}]]
         [:dispatch [:wallet/clear-collectibles-request-details]])]}))
 
 (rf/defn new-wallet-event
