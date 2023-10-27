@@ -33,17 +33,18 @@
 
 (defn- view-internal
   []
-  (let [top                  (safe-area/get-top)
-        bottom               (safe-area/get-bottom)
-        account-color        (reagent/atom :blue)
-        emoji                (reagent/atom diamond-emoji)
-        number-of-accounts   (count (rf/sub [:profile/wallet-accounts]))
-        account-name         (reagent/atom (i18n/label :t/default-account-name
-                                                       {:number (inc number-of-accounts)}))
-        derivation-path      (reagent/atom (utils/get-derivation-path number-of-accounts))
-        {:keys [public-key]} (rf/sub [:profile/profile])
-        on-change-text       #(reset! account-name %)
-        display-name         (first (rf/sub [:contacts/contact-two-names-by-identity public-key]))]
+  (let [top                   (safe-area/get-top)
+        bottom                (safe-area/get-bottom)
+        account-color         (reagent/atom :blue)
+        emoji                 (reagent/atom diamond-emoji)
+        number-of-accounts    (count (rf/sub [:profile/wallet-accounts]))
+        account-name          (reagent/atom (i18n/label :t/default-account-name
+                                                        {:number (inc number-of-accounts)}))
+        derivation-path       (reagent/atom (utils/get-derivation-path number-of-accounts))
+        {:keys [public-key]}  (rf/sub [:profile/profile])
+        on-change-text        #(reset! account-name %)
+        display-name          (first (rf/sub [:contacts/contact-two-names-by-identity public-key]))
+        {window-width :width} (rn/get-window)]
     (fn [{:keys [theme]}]
       [rn/view
        {:style {:flex       1
@@ -93,6 +94,7 @@
         [quo/color-picker
          {:default-selected @account-color
           :on-change        #(reset! account-color %)
+          :window-width     window-width
           :container-style  {:padding-horizontal 12
                              :padding-vertical   12}}]]
        [quo/divider-line]
