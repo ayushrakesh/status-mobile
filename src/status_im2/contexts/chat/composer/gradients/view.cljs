@@ -5,7 +5,6 @@
     [react-native.reanimated :as reanimated]
     [status-im2.contexts.chat.composer.gradients.style :as style]))
 
-
 (defn f-view
   [{:keys [input-ref]}
    {:keys [gradient-z-index]}
