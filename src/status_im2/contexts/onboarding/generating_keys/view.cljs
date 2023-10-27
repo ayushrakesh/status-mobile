@@ -44,7 +44,7 @@
   (reanimated/set-shared-value
    saving-keys-opacity
    (reanimated/with-sequence
-    (reanimated/with-delay 2000
+    (reanimated/with-delay 2500
                            (reanimated/with-timing 1
                                                    (js-obj "duration" transition-duration-ms
                                                            "easing"   (:linear reanimated/easings))))
@@ -54,7 +54,7 @@
                                                            "easing"   (:linear reanimated/easings))))))
   (reanimated/set-shared-value keys-saved-opacity
                                (reanimated/with-delay
-                                4600
+                                5100
                                 (reanimated/with-timing 1
                                                         (js-obj "duration" transition-duration-ms
                                                                 "easing"   (:linear
