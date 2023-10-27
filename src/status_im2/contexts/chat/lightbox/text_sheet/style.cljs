@@ -32,7 +32,7 @@
   {:width            32
    :height           4
    :border-radius    100
-   :background-color colors/white-opa-40})
+   :background-color colors/white-opa-10})
 
 (defn top-gradient
   [{:keys [derived-value]} {:keys [top]} insets max-height]
