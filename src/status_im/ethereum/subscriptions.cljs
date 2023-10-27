@@ -5,7 +5,8 @@
     [status-im.wallet.db :as wallet]
     [taoensso.timbre :as log]
     [utils.ethereum.eip.eip55 :as eip55]
-    [utils.re-frame :as rf]))
+    [utils.re-frame :as rf]
+    [utils.transforms :as types]))
 
 (rf/defn new-transfers
   [cofx block-number accounts]
@@ -67,6 +68,26 @@
   [{:keys [db]} _]
   {:db (assoc db :wallet-legacy/non-archival-node true)})
 
+(rf/defn wallet-owned-collectibles-filtering-done
+  [{:keys [db]} {:keys [accounts blockNumber message] :as event}]
+
+  (let [response                              (types/json->clj message)
+        {:keys [collectibles hasMore offset]} response
+        next-offset                           (+ offset (count collectibles))
+        addresses                             (get-in db
+                                                      [:wallet :ongoing-collectibles-request
+                                                       :addresses])]
+    {:fx
+     [[:dispatch [:wallet/store-collectibles collectibles]]
+      (if hasMore
+        [:dispatch
+         [:wallet/request-collectibles
+          {:addresses addresses
+           :offset
+           next-offset
+          }]]
+        [:dispatch [:wallet/clear-collectibles-request-details]])]}))
+
 (rf/defn new-wallet-event
   [cofx {:keys [type blockNumber accounts] :as event}]
   (log/info "[wallet-subs] new-wallet-event"
@@ -74,9 +95,10 @@
             "blockNumber" blockNumber
             "accounts"    accounts)
   (case type
-    "new-transfers"              (new-transfers cofx blockNumber accounts)
-    "recent-history-fetching"    (recent-history-fetching-started cofx accounts)
-    "recent-history-ready"       (recent-history-fetching-ended cofx event)
-    "fetching-history-error"     (fetching-error cofx event)
-    "non-archival-node-detected" (non-archival-node-detected cofx event)
+    "new-transfers"                            (new-transfers cofx blockNumber accounts)
+    "recent-history-fetching"                  (recent-history-fetching-started cofx accounts)
+    "recent-history-ready"                     (recent-history-fetching-ended cofx event)
+    "fetching-history-error"                   (fetching-error cofx event)
+    "non-archival-node-detected"               (non-archival-node-detected cofx event)
+    "wallet-owned-collectibles-filtering-done" (wallet-owned-collectibles-filtering-done cofx event)
     (log/warn ::unknown-wallet-event :type type :event event)))

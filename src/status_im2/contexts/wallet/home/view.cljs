@@ -46,12 +46,19 @@
    {:id :collectibles :label (i18n/label :t/collectibles) :accessibility-label :collectibles-tab}
    {:id :activity :label (i18n/label :t/activity) :accessibility-label :activity-tab}])
 
-(defn view
+(defn f-view
   []
   (let [top          (safe-area/get-top)
         selected-tab (reagent/atom (:id (first tabs-data)))]
     (fn []
-      (let [networks (rf/sub [:wallet/network-details])]
+      (let [networks         (rf/sub [:wallet/network-details])
+            wallet-addresses (rf/sub [:wallet/all-addresses
+                                      networks (rf/sub [:wallet/network-details])])]
+        (rn/use-effect (fn []
+                         (rf/dispatch [:wallet/request-collectibles
+                                       {:addresses    wallet-addresses
+                                        :offset       0
+                                        :new-request? true}])))
         [rn/view
          {:style {:margin-top top
                   :flex       1}}
@@ -83,3 +90,7 @@
                            :content-container-style {:padding-horizontal 8}}]
            :collectibles [collectibles/view]
            [activity/view])]))))
+
+(defn view
+  []
+  [:f> f-view])

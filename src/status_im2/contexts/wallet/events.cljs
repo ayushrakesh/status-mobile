@@ -3,6 +3,7 @@
     [native-module.core :as native-module]
     [status-im2.data-store.wallet :as data-store]
     [taoensso.timbre :as log]
+    [utils.ethereum.chain :as chain]
     [utils.re-frame :as rf]
     [utils.security.core :as security]))
 
@@ -75,3 +76,53 @@
                            data-store/<-rpc)
                      data)}]
      {:db (assoc db :wallet/networks network-data)})))
+
+(def collectibles-request-batch-size 1000)
+
+(defn- displayable-collectible?
+  [{:keys [image_url animation_url]}]
+  (or (not= "" animation_url)
+      (not= "" image_url)))
+
+(rf/reg-event-fx :wallet/store-collectibles
+ (fn [{:keys [db]} [collectibles]]
+   (let [stored-collectibles      (get-in db [:wallet :collectibles])
+         displayable-collectibles (filter displayable-collectible? collectibles)]
+     {:db (assoc-in db
+           [:wallet :collectibles]
+           (reduce conj displayable-collectibles stored-collectibles))})))
+
+(rf/reg-event-fx :wallet/clear-stored-collectibles
+ (fn [{:keys [db]}]
+   {:db (assoc-in db [:wallet :collectibles] [])}))
+
+(rf/reg-event-fx :wallet/save-collectibles-request-details
+ (fn [{:keys [db]} [request-details]]
+   {:db (assoc-in db [:wallet :ongoing-collectibles-request] request-details)}))
+
+(rf/reg-event-fx :wallet/clear-collectibles-request-details
+ (fn [{:keys [db]}]
+   {:db (assoc-in db [:wallet :ongoing-collectibles-request] {})}))
+
+(rf/reg-event-fx :wallet/request-collectibles
+ (fn [{:keys [db]} [{:keys [addresses offset new-request?]}]]
+   (let [request-params [0
+                         [(chain/chain-id db)]
+                         addresses
+                         offset
+                         collectibles-request-batch-size]]
+     (merge
+      {:json-rpc/call [{:method     "wallet_filterOwnedCollectiblesAsync"
+                        :params     request-params
+                        :on-success #()
+                        :on-error   (fn [error]
+                                      (log/error "failed to request collectibles"
+                                                 {:event  :wallet/request-collectibles
+                                                  :error  error
+                                                  :params request-params})
+                                    )}]}
+      (when new-request?
+        {:fx
+         [[:dispatch [:wallet/clear-stored-collectibles]]
+          [:dispatch [:wallet/save-collectibles-request-details {:addresses addresses}]]]})))))
+
