@@ -57,7 +57,7 @@
     "react-native-orientation-locker": "^1.5.0",
     "react-native-permissions": "^2.1.5",
     "react-native-randombytes": "^3.6.1",
-    "react-native-reanimated": "3.3.0",
+    "react-native-reanimated": "3.5.4",
     "react-native-redash": "18.1.0",
     "react-native-shake": "^3.3.1",
     "react-native-share": "^8.2.2",
@@ -72,10 +72,10 @@
     "tdigest": "^0.1.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.0",
     "@babel/generator": "^7.20.0",
     "@babel/helper-builder-react-jsx": "^7.20.0",
     "@babel/plugin-transform-block-scoping": "^7.20.0",
-    "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
     "@babel/preset-react": "^7.18.6",
     "@babel/register": "7.0.0",
